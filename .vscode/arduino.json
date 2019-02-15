@@ -1,0 +1,7 @@
+{
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega328old",
+    "port": "/dev/cu.wchusbserial1420",
+    "programmer": "AVRISP mkII",
+    "sketch": "receiver/receiver.ino"
+}

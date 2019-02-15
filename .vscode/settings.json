@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.lit": "html",
+        "limits": "cpp",
+        "type_traits": "cpp"
+    }
+}
