@@ -1,0 +1,6 @@
+PREV KEY = Left Arrow
+NEXT KEY = Right Arrow
+PAUSE KEY = Space Bar
+
+NEXT KEY HOLD = Shift + N
+PREV KEY HOLD = Shift + P
