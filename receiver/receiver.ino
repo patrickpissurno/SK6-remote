@@ -1,7 +1,10 @@
 #include <IRremote.h>
+#include "TimerOne.h"
 
 // Define sensor pin
 const int RECV_PIN = 2;
+
+const int RECEIVER_HANDSHAKE_CODE = 28719;
 
 const int BUTTON_NEXT = 1;
 const int BUTTON_PREV = 2;
@@ -26,12 +29,23 @@ int repeat_button_count = 0;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
 
+void sendHandshake();
+void handleCode();
+
 void setup()
 {
     // Serial Monitor @ 9600 baud
     Serial.begin(9600);
+
     // Enable the IR Receiver
     irrecv.enableIRIn();
+    
+    // Send handshake code
+    sendHandshake();
+
+    // Enable interrupt
+    Timer1.initialize(1000000); //1 second period
+    Timer1.attachInterrupt(sendHandshake);
 }
 
 void loop()
@@ -41,6 +55,10 @@ void loop()
         handleCode();
         irrecv.resume();
     }
+}
+
+void sendHandshake(){
+    Serial.println(RECEIVER_HANDSHAKE_CODE);
 }
 
 void handleCode(){

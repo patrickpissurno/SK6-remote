@@ -17,6 +17,8 @@ const int kVK_Return = 0x24;
 const int kVK_ANSI_N = 0x2D;
 const int kVK_ANSI_P = 0x23;
 
+const int RECEIVER_HANDSHAKE_CODE = 28719;
+
 const int BUTTON_NEXT = 1;
 const int BUTTON_PREV = 2;
 const int BUTTON_PAUSE = 3;
@@ -57,13 +59,31 @@ void Press(int key, bool shift)
     usleep(5000);
 }
 
-int main(int argc, char *argv[])
+int findSerialPorts(char (*output)[128]){
+    char buf[128];
+    FILE* fp;
+
+    if ((fp = popen("ls /dev/cu.*", "r")) == NULL) {
+        printf("Error opening pipe!\n");
+        return -1;
+    }
+
+    int length = 0;
+    while (fscanf(fp, " %s ", buf) == 1) {
+        sprintf(output[length], "%s", buf);
+        length += 1;
+    }
+
+    if(pclose(fp))  {
+        printf("Command not found or exited with error status\n");
+        return -1;
+    }
+
+    return length;
+}
+
+int main(int argc, char* argv[])
 {
-    printf("Daemon started\n");
-
-    //wait a bit of time for all components to initialize before trying to connect
-    sleep(60);
-
     const int buf_max = 256;
 
     char serialport[buf_max];
@@ -72,9 +92,44 @@ int main(int argc, char *argv[])
     char buf[buf_max];
     int rc, n;
 
-    printf("Connecting to the Receiver device\n");
+    printf("Daemon started\n");
 
-    int fd = serialport_init("/dev/cu.wchusbserial1420", 9600);
+    //wait a bit of time for all components to initialize before trying to connect
+    sleep(10);
+
+    printf("Locating the Receiver device\n");
+
+    char ports[128][128];
+    int ports_count;
+    int fd;
+    int handshake;
+    do {
+        sleep(1);
+
+        ports_count = findSerialPorts(ports);
+        for(int i = 0; i < ports_count; i++){
+            fd = serialport_init(ports[i], 9600);
+            if(fd == -1)
+                continue;
+
+            memset(buf, 0, buf_max);
+            serialport_read_until(fd, buf, eolchar, buf_max, 2100);
+
+            handshake = 0;
+            handshake = strtol(buf, NULL, 10);
+
+            if(handshake == RECEIVER_HANDSHAKE_CODE)
+                break;
+            else {
+                serialport_close(fd);
+                fd = -1;
+            }
+        }
+    }
+    while(ports_count < 1);
+    
+
+    // int fd = serialport_init("/dev/cu.wchusbserial1420", 9600);
     if(fd == -1){
         sleep(10);
         exit(1);
@@ -92,6 +147,9 @@ int main(int argc, char *argv[])
 
             btn = 0;
             btn = strtol(buf, NULL, 10);
+
+            if(btn == RECEIVER_HANDSHAKE_CODE)
+                continue;
 
             switch(btn){
                 case BUTTON_NEXT:
