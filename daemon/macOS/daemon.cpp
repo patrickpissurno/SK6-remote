@@ -59,6 +59,11 @@ void Press(int key, bool shift)
 
 int main(int argc, char *argv[])
 {
+    printf("Daemon started\n");
+
+    //wait a bit of time for all components to initialize before trying to connect
+    sleep(60);
+
     const int buf_max = 256;
 
     char serialport[buf_max];
@@ -67,7 +72,15 @@ int main(int argc, char *argv[])
     char buf[buf_max];
     int rc, n;
 
+    printf("Connecting to the Receiver device\n");
+
     int fd = serialport_init("/dev/cu.wchusbserial1420", 9600);
+    if(fd == -1){
+        sleep(10);
+        exit(1);
+    }
+
+    printf("Connected to the Receiver device\n");
 
     int btn = 0;
     while (true)
