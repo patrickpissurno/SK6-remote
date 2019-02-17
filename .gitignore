@@ -34,3 +34,6 @@
 bin/
 .DS_Store
 .pkg
+
+.vs
+obj/
