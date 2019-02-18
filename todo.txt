@@ -1,0 +1,3 @@
+- Create proper uninstaller for macOS
+- Create proper uninstaller for Windows
+- Write a decent DIY guide about the project
