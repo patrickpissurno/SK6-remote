@@ -9,12 +9,12 @@ We provide a [custom Sketch](https://github.com/patrickpissurno/SK6-remote/blob/
 **Please note that you will also need an IR receiver properly connected to the Arduino board.**
 
 ## Instalation guide
-Full details coming soon.
+You can find basic instructions on the Downloads page. Full details coming soon.
 
 ## Downloads
 - Arduino Sketch: [Download now](https://github.com/patrickpissurno/SK6-remote/blob/master/receiver/receiver.ino)
-- macOS Installer: [Download now](https://github.com/patrickpissurno/SK6-remote/releases)
-- Windows Installer: coming soon
+- macOS Installer: [Download now](https://github.com/patrickpissurno/SK6-remote/releases/tag/1.0.1)
+- Windows Installer: [Download now](https://github.com/patrickpissurno/SK6-remote/releases/tag/1.0.1-win)
 
 ## License
 MIT License
