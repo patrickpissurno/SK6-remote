@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{2F03DC7D-CBB7-4979-A7F3-4C9581F2EE95}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daemon", "Daemon\Daemon.csproj", "{4BDF0DD1-1BA1-46DD-B14A-79551CAB96DA}"
 EndProject
 Global
@@ -11,6 +13,8 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2F03DC7D-CBB7-4979-A7F3-4C9581F2EE95}.Debug|Any CPU.ActiveCfg = Debug
+		{2F03DC7D-CBB7-4979-A7F3-4C9581F2EE95}.Release|Any CPU.ActiveCfg = Release
 		{4BDF0DD1-1BA1-46DD-B14A-79551CAB96DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4BDF0DD1-1BA1-46DD-B14A-79551CAB96DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BDF0DD1-1BA1-46DD-B14A-79551CAB96DA}.Release|Any CPU.ActiveCfg = Release|Any CPU

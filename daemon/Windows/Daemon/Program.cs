@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32.TaskScheduler;
+using System;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace Daemon
@@ -56,119 +54,139 @@ namespace Daemon
             Thread.Sleep(1);
         }
 
+        static void Exit(int status)
+        {
+            if(status != 0)
+            {
+                using (TaskService ts = new TaskService())
+                {
+                    var task = ts.FindTask(ProjectInstaller.TASK_NAME);
+                    if (task != null)
+                        task.Run();
+                }
+            }
+            Environment.Exit(status);
+        }
+
         static void Main(string[] args)
         {
-            const int bufferMax = 256;
-            byte[] buf = new byte[bufferMax];
-
-            Console.WriteLine("Daemon Started");
-
-            //wait a bit of time for all components to initialize before trying to connect
-            Thread.Sleep(10000);
-
-            Console.WriteLine("Locating the Receiver device");
-
-            string[] ports;
-            int portsLength;
-            SerialPort port = null;
-            do
+            try
             {
-                Thread.Sleep(1000);
-                ports = SerialPort.GetPortNames();
-                portsLength = ports.Length;
+                const int bufferMax = 256;
+                byte[] buf = new byte[bufferMax];
 
-                foreach (var name in ports) {
-                    try
+                Console.WriteLine("Daemon Started");
+
+                //wait a bit of time for all components to initialize before trying to connect
+                Thread.Sleep(10000);
+
+                Console.WriteLine("Locating the Receiver device");
+
+                string[] ports;
+                int portsLength;
+                SerialPort port = null;
+                do
+                {
+                    Thread.Sleep(1000);
+                    ports = SerialPort.GetPortNames();
+                    portsLength = ports.Length;
+
+                    foreach (var name in ports)
                     {
-                        port = new SerialPort(name, 9600);
-                        port.ReadTimeout = 2100;
-                        port.DtrEnable = true;
-                        port.Open();
-
-                        if (port.ReadLine().Trim() == RECEIVER_HANDSHAKE_CODE.ToString())
-                            break;
-
-                        throw new Exception();
-                    }
-                    catch
-                    {
-                        portsLength -= 1;
-                        if (port != null)
+                        try
                         {
-                            if(port.IsOpen)
-                                port.Close();
-                            port.Dispose();
+                            port = new SerialPort(name, 9600);
+                            port.ReadTimeout = 2100;
+                            port.DtrEnable = true;
+                            port.Open();
+
+                            if (port.ReadLine().Trim() == RECEIVER_HANDSHAKE_CODE.ToString())
+                                break;
+
+                            throw new Exception();
                         }
-                        port = null;
+                        catch
+                        {
+                            portsLength -= 1;
+                            if (port != null)
+                            {
+                                if (port.IsOpen)
+                                    port.Close();
+                                port.Dispose();
+                            }
+                            port = null;
+                        }
                     }
                 }
-            }
-            while (portsLength < 1);
+                while (portsLength < 1);
 
-            if(port == null)
-            {
-                Console.WriteLine("Failed to find a Receiver device");
-
-                Thread.Sleep(10);
-                Environment.Exit(1);
-            }
-
-            Console.WriteLine("Connected to the Receiver device");
-
-            port.ReadTimeout = 5000;
-
-            int btn = 0;
-            while (true)
-            {
-                Thread.Sleep(500);
-                for (int i = 0; i < 5; i++)
+                if (port == null)
                 {
-                    btn = 0;
-                    
-                    try
-                    {
-                        btn = int.Parse(port.ReadLine().Trim());
-                    }
-                    catch
+                    Console.WriteLine("Failed to find a Receiver device");
+
+                    Thread.Sleep(10);
+                    Exit(1);
+                }
+
+                Console.WriteLine("Connected to the Receiver device");
+
+                port.ReadTimeout = 5000;
+
+                int btn = 0;
+                while (true)
+                {
+                    Thread.Sleep(500);
+                    for (int i = 0; i < 5; i++)
                     {
                         btn = 0;
+
+                        try
+                        {
+                            btn = int.Parse(port.ReadLine().Trim());
+                        }
+                        catch
+                        {
+                            btn = 0;
+                        }
+
+                        if (btn == RECEIVER_HANDSHAKE_CODE)
+                            continue;
+
+                        switch (btn)
+                        {
+                            case BUTTON_NEXT:
+                                Press(ScanCodeShort.RIGHT, false);
+                                break;
+                            case BUTTON_PREV:
+                                Press(ScanCodeShort.LEFT, false);
+                                break;
+                            case BUTTON_PAUSE:
+                                Press(ScanCodeShort.SPACE, false);
+                                break;
+                            case BUTTON_NEXT_HOLD:
+                                Press(ScanCodeShort.KEY_N, true);
+                                break;
+                            case BUTTON_PREV_HOLD:
+                                Press(ScanCodeShort.KEY_P, true);
+                                break;
+                        }
+
+                        Thread.Sleep(5);
                     }
 
-                    if (btn == RECEIVER_HANDSHAKE_CODE)
-                        continue;
-
-                    switch (btn)
-                    {
-                        case BUTTON_NEXT:
-                            Press(ScanCodeShort.RIGHT, false);
-                            break;
-                        case BUTTON_PREV:
-                            Press(ScanCodeShort.LEFT, false);
-                            break;
-                        case BUTTON_PAUSE:
-                            Press(ScanCodeShort.SPACE, false);
-                            break;
-                        case BUTTON_NEXT_HOLD:
-                            Press(ScanCodeShort.KEY_N, true);
-                            break;
-                        case BUTTON_PREV_HOLD:
-                            Press(ScanCodeShort.KEY_P, true);
-                            break;
-                    }
-
-                    Thread.Sleep(5);
+                    if (!port.IsOpen)
+                        break;
                 }
 
-                if (!port.IsOpen)
-                    break;
+                port.Close();
+                port.Dispose();
+
+                Console.WriteLine("Disconnected from the Receiver device");
             }
-
-            port.Close();
-            port.Dispose();
-
-            Console.WriteLine("Disconnected from the Receiver device");
-
-            Environment.Exit(1);
+            finally
+            {
+                Exit(1);
+            }
         }
     }
 }
