@@ -4,11 +4,11 @@ Make your LG SK6 soundbar remote controller work with your computer
 ## Disclaimer
 This program requires an Arduino-compatible device to be plugged into the computer for it to work.
 
-We provide a [custom Sketch](https://github.com/patrickpissurno/SK6-remote/blob/master/receiver/receiver.ino) for you to flash the Arduino with.
+A [custom Sketch](https://github.com/patrickpissurno/SK6-remote/blob/master/receiver/receiver.ino) is provided for you to flash the Arduino with.
 
 **Please note that you will also need an IR receiver properly connected to the Arduino board.**
 
-## Instalation guide
+## Installation guide
 You can find basic instructions on the Downloads page. Full details coming soon.
 
 ## Downloads
